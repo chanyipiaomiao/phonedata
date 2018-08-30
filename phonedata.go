@@ -5,9 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
-	"path"
-	"runtime"
 )
 
 const (
@@ -21,17 +18,7 @@ const (
 	CHAR_LEN           = 1
 	HEAD_LENGTH        = 8
 	PHONE_INDEX_LENGTH = 9
-	PHONE_DAT          = "phone.dat"
 )
-
-type PhoneRecord struct {
-	PhoneNum string
-	Province string
-	City     string
-	ZipCode  string
-	AreaZone string
-	CardType string
-}
 
 var (
 	content     []byte
@@ -46,19 +33,41 @@ var (
 	total_len, firstoffset int32
 )
 
-func init() {
-	dir := os.Getenv("PHONE_DATA_DIR")
-	if dir == "" {
-		_, fulleFilename, _, _ := runtime.Caller(0)
-		dir = path.Dir(fulleFilename)
-	}
+type PhoneRecord struct {
+	PhoneNum string
+	Province string
+	City     string
+	ZipCode  string
+	AreaZone string
+	CardType string
+}
+
+type PhoneQuery struct{}
+
+func NewPhoneQuery(datPath string) (*PhoneQuery, error) {
 	var err error
-	content, err = ioutil.ReadFile(path.Join(dir, PHONE_DAT))
+	content, err = ioutil.ReadFile(datPath)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	total_len = int32(len(content))
 	firstoffset = get4(content[INT_LEN : INT_LEN*2])
+	return &PhoneQuery{}, nil
+}
+
+func (p *PhoneQuery) Query(phone string) (map[string]string, error) {
+	pr, err := Find(phone)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]string{
+		"PhoneNum": pr.PhoneNum,
+		"Province": pr.Province,
+		"City":     pr.City,
+		"ZipCode":  pr.ZipCode,
+		"AreaZone": pr.AreaZone,
+		"CardType": pr.CardType,
+	}, nil
 }
 
 func Debug() {
