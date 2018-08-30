@@ -31,29 +31,27 @@
 package main
 
 import (
+	"github.com/chanyipiaomiao/phonedata"
 	"fmt"
-
-	"github.com/xluohome/phonedata"
 )
 
 func main() {
-	pr, err := phonedata.Find("18957509123")
+	p, err := phonedata.NewPhoneQuery("data/phone.dat")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Print(pr)
+	m, err := p.Query("手机号")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(m)
 }
 
 ````
 go run test.go
 
 ```
-PhoneNum: 18957509123
-AreaZone: 0575
-CardType: 中国电信
-City: 绍兴
-ZipCode: 312000
-Province: 浙江
+map[City:上海 ZipCode:200000 AreaZone:021 CardType:中国移动 PhoneNum:手机号 Province:上海]
 ```
 
 ### 快速使用
